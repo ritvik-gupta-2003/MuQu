@@ -2,6 +2,8 @@ import React from 'react';
 import Youtube from 'react-youtube';
 import './App.css';
 
+import {putData} from './AwsFunctions.js';
+
 class App extends React.Component {
   constructor() {
     super();
@@ -63,6 +65,7 @@ class App extends React.Component {
       e.preventDefault();
       if ((String)(this.state.typed).indexOf("=") !== -1) {
         this.state.links.push(this.state.typed);
+        await putData('songlinks', this.state.typed);
       }
       this.setState({typed:""});
     }

@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
+import React from 'react';
 import Youtube from 'react-youtube';
 import './App.css';
 
-class App extends Component {
+class App extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -32,19 +32,25 @@ class App extends Component {
 
   playLink() {
     var url = (String)(this.state.links[0]);
-    var index = url.indexOf("=");
-    url = url.substring(index+1);
+    url = url.substring(url.indexOf("=")+1);
 
     const opts = {
-      height:'100',
-      width:'100',
       playerVars: {
         autoplay: 1
       }
     }
-    console.log(url);
     return (
       <Youtube videoId={url} opts={opts} onReady={this.onReady}/>
+    )
+  }
+  onPlayerReady = event => {
+    event.target.playVideo();
+  }
+  printSong(url) {
+    return (
+      <div>
+        <p>{url.url}</p>
+      </div>
     )
   }
   playRoom() {
@@ -68,6 +74,7 @@ class App extends Component {
         </div>
         <div>
           {this.playLink()}
+          {this.state.links.map(link => <this.printSong url={link}/>)}
         </div>
       </>
     )

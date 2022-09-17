@@ -6,7 +6,8 @@ class App extends Component {
     super();
     this.state = {
       typed: "",
-      username: ""
+      username: "",
+      links: []
     }
   }
   signIn() {
@@ -27,11 +28,29 @@ class App extends Component {
       </>
     )
   }
+
+  chatroom() {
+    const setLink = async(e) => {
+      e.preventDefault();
+      this.state.links.push(this.state.typed);
+      this.setState({typed:""});
+    }
+    return (
+      <>
+        <div>
+          <form onSubmit={setLink}>
+            <input value={this.state.typed} onChange={(e) => this.setState({typed:e.target.value})} />
+            <button type="submit">Play</button>
+          </form>
+        </div>
+      </>
+    )
+  }
   
   render() {
     return (
       <section>
-        {this.signIn()}
+        {this.state.username==="" ? this.signIn() : this.chatroom()}
       </section>
     );
   }

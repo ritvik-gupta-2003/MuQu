@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Youtube from 'react-youtube';
 import './App.css';
 
 class App extends Component {
@@ -29,19 +30,44 @@ class App extends Component {
     )
   }
 
-  chatroom() {
+  playLink() {
+    var url = (String)(this.state.links[0]);
+    var index = url.indexOf("=");
+    url = url.substring(index+1);
+
+    const opts = {
+      height:'100',
+      width:'100',
+      playerVars: {
+        autoplay: 1
+      }
+    }
+    console.log(url);
+    return (
+      <Youtube videoId={url} opts={opts} onReady={this.onReady}/>
+    )
+  }
+  playRoom() {
     const setLink = async(e) => {
       e.preventDefault();
-      this.state.links.push(this.state.typed);
+      if ((String)(this.state.typed).indexOf("=") !== -1) {
+        this.state.links.push(this.state.typed);
+      }
       this.setState({typed:""});
     }
     return (
       <>
         <div>
+          <h1>Enter Youtube Link</h1>
+        </div>
+        <div>
           <form onSubmit={setLink}>
             <input value={this.state.typed} onChange={(e) => this.setState({typed:e.target.value})} />
             <button type="submit">Play</button>
           </form>
+        </div>
+        <div>
+          {this.playLink()}
         </div>
       </>
     )
@@ -50,7 +76,7 @@ class App extends Component {
   render() {
     return (
       <section>
-        {this.state.username==="" ? this.signIn() : this.chatroom()}
+        {this.state.username==="" ? this.signIn() : this.playRoom()}
       </section>
     );
   }

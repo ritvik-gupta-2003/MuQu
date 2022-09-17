@@ -31,6 +31,14 @@ class App extends React.Component {
   }
 
   playLink() {
+    const checkEnded = (e) => {
+      const duration = e.target.getDuration();
+      const current = e.target.getCurrentTime();
+      if (current / duration === 1) {
+        this.state.links.shift();
+        console.log("next");
+      }
+    }
     var url = (String)(this.state.links[0]);
     url = url.substring(url.indexOf("=")+1);
 
@@ -40,11 +48,8 @@ class App extends React.Component {
       }
     }
     return (
-      <Youtube videoId={url} opts={opts} onReady={this.onReady}/>
+      <Youtube videoId={url} opts={opts} onStateChange={(e) => checkEnded(e)}/>
     )
-  }
-  onPlayerReady = event => {
-    event.target.playVideo();
   }
   printSong(url) {
     return (

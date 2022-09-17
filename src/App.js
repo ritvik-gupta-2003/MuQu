@@ -36,7 +36,7 @@ class App extends React.Component {
       const current = e.target.getCurrentTime();
       if (current / duration === 1) {
         this.state.links.shift();
-        console.log("next");
+        this.setState({typed:""});
       }
     }
     var url = (String)(this.state.links[0]);

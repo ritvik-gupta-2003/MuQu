@@ -37,11 +37,7 @@ function PlayRoom() {
 
   const checkEnded = async(e) => {
     if (e.target.getPlayerState() === 0) {
-      // await query.limit(1).get().delete().then(querySnapshot => {
-      //   if (!querySnapshot.empty()) {
-      //     querySnapshot.docs[0].ref.delete();
-      //   }
-      // })
+      await messagesRef.doc("1").delete();
     }
   }
   const onPlayerReady = async(e) => {
@@ -53,7 +49,8 @@ function PlayRoom() {
   const sendMessage = async(e) => {
     e.preventDefault();
     if (url !== -1) {
-      await messagesRef.add({
+      const id = (messages.length+1)+"";
+      await messagesRef.doc(id).set({
         text: link,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
@@ -64,7 +61,7 @@ function PlayRoom() {
   const opts = {
     playerVars: {
       autoplay: 1,
-      controls: 0
+      //controls: 0
     }
   }
 

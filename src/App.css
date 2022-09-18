@@ -4,6 +4,14 @@ html {
   color: white;
 }
 
+input {
+  width: 50%;
+}
+input[type=submit] {
+  background-color: red;
+  color: white;
+}
+
 iframe {
   width: 25%;
   height: 25%;

@@ -18,11 +18,31 @@ firebase.initializeApp({
 const firestore = firebase.firestore();
 
 function App() {
+  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
+  function SignIn() {
+    const setNameName = async(e) => {
+      e.preventDefault();
+      setUsername(name);
+      setName('');
+    }
+    return (
+      <>
+        <div>
+          <h1>Enter Username</h1>
+          <form onSubmit={setNameName}>
+            <input value={name} onChange={(e) => setName(e.target.value)} />
+            <button type="submit">ENTER</button>
+          </form>
+        </div>
+      </>
+    )
+  }
   return (
     <>
       <div>
         <section>
-          <PlayRoom />
+          {username==="" ? <SignIn /> : <PlayRoom />}
         </section>
       </div>
     </>
@@ -90,125 +110,5 @@ function PrintSong(props) {
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// class App extends React.Component {
-//   constructor() {
-//     super();
-//     this.state = {
-//       typed: "",
-//       username: "",
-//       links: [],
-//     }
-//   }
-
-//   fetchMessages = async() => {
-//     query.onSnapshot((snapshot) => {
-//       snapshot.docChanges().forEach((changes) => {
-//         this.setState({links:changes.doc.data()});
-//         console.log("GOT MESSAGE");
-//       })
-//     })
-//   }
-
-  // signIn() {
-  //   const setUsername = async(e) => {
-  //     e.preventDefault();
-  //     this.setState({username:this.state.typed});
-  //     this.setState({typed:""});
-  //   }
-  //   return (
-  //     <>
-  //       <div>
-  //         <h1>Enter Username</h1>
-  //         <form onSubmit={setUsername}>
-  //           <input value={this.state.typed} onChange={(e) => this.setState({typed:e.target.value})} />
-  //           <button type="submit">ENTER</button>
-  //         </form>
-  //       </div>
-  //     </>
-  //   )
-  // }
-
-  // playLink() {
-  //   const checkEnded = async(e) => {
-  //     const duration = e.target.getDuration();
-  //     const current = e.target.getCurrentTime();
-  //     if (current / duration === 1) {
-  //       await this.state.links.shift();
-  //       this.setState({typed:""});
-  //     }
-  //   }
-  //   var url = (String)(this.state.links[0]);
-  //   url = url.substring(url.indexOf("=")+1);
-
-  //   const opts = {
-  //     playerVars: {
-  //       autoplay: 1
-  //     }
-  //   }
-  //   return (
-  //     <Youtube videoId={url} opts={opts} onStateChange={(e) => checkEnded(e)}/>
-  //   )
-  // }
-  // printSong(url) {
-  //   return (
-  //     <div>
-  //       <p>{url.url}</p>
-  //     </div>
-  //   )
-  // }
-  // playRoom() {
-  //   const setLink = async(e) => {
-  //     e.preventDefault();
-  //     if ((String)(this.state.typed).indexOf("=") !== -1) {
-  //       this.state.links.push(this.state.typed);
-  //       this.setState({typed:""});
-  //     }
-  //   }
-  //   return (
-  //     <>
-  //       <div>
-  //         <h1>Enter Youtube Link</h1>
-  //       </div>
-  //       <div>
-  //         <form onSubmit={setLink}>
-  //           <input value={this.state.typed} onChange={(e) => this.setState({typed:e.target.value})} />
-  //           <button type="submit">Play</button>
-  //         </form>
-  //       </div>
-  //       <div>
-  //         {this.playLink()}
-  //         {this.state.links.map(link => <this.printSong url={link}/>)}
-  //       </div>
-  //     </>
-  //   )
-  // }
-  
-//   render() {
-//     return (
-//       <section>
-//         {this.state.username==="" ? this.signIn() : this.playRoom()}
-//       </section>
-//     );
-//   }
-// }
 
 export default App;

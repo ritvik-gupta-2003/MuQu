@@ -2,7 +2,8 @@ import React from 'react';
 import Youtube from 'react-youtube';
 import './App.css';
 
-import {putData} from './AwsFunctions.js';
+const AWS = require('aws-sdk');
+const docClient = new AWS.DynamoDB.DocumentClient({region: 'us-east-2', accessKeyId: 'AKIAY5LDIFZX6JKWLB5H', secretAccessKey: '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'});
 
 class App extends React.Component {
   constructor() {
@@ -10,14 +11,41 @@ class App extends React.Component {
     this.state = {
       typed: "",
       username: "",
-      links: []
+      links: [],
     }
+    this.dbData = {};
   }
+  fetchData = async(tableName) => {
+    var params = {
+      TableName: tableName
+    }
+    docClient.scan(params, function(err, data) {
+    })
+  }
+  putData = async(tableName, data) => {
+    var params = {
+        TableName: tableName,
+        Item: {
+            'songlinks_part': 'song',
+            'songlinks_sort': data,
+        }
+    }
+    docClient.put(params, function(err, data) {
+        if (err) {
+            console.log("Error",err)
+        }
+        else {
+            console.log("Success",data)
+        }
+    })
+  }
+
   signIn() {
     const setUsername = async(e) => {
       e.preventDefault();
       this.setState({username:this.state.typed});
       this.setState({typed:""});
+      console.log(this.fetchData('testdb'));
     }
     return (
       <>
@@ -33,11 +61,11 @@ class App extends React.Component {
   }
 
   playLink() {
-    const checkEnded = (e) => {
+    const checkEnded = async(e) => {
       const duration = e.target.getDuration();
       const current = e.target.getCurrentTime();
       if (current / duration === 1) {
-        this.state.links.shift();
+        await this.state.links.shift();
         this.setState({typed:""});
       }
     }
@@ -65,9 +93,9 @@ class App extends React.Component {
       e.preventDefault();
       if ((String)(this.state.typed).indexOf("=") !== -1) {
         this.state.links.push(this.state.typed);
-        await putData('songlinks', this.state.typed);
+        await this.putData('testdb', this.state.typed);
+        this.setState({typed:""});
       }
-      this.setState({typed:""});
     }
     return (
       <>

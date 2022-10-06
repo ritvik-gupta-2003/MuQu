@@ -1,114 +1,147 @@
-import React, {useState} from 'react';
+import React from 'react';
 import Youtube from 'react-youtube';
 import './App.css';
 
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/firestore';
-import {useCollectionData} from 'react-firebase-hooks/firestore';
+const AWS = require('aws-sdk');
+const docClient = new AWS.DynamoDB.DocumentClient({region: 'us-east-2', accessKeyId: 'AKIAU4GEEV7DHTFK5RDF', secretAccessKey: '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'});
 
-firebase.initializeApp({
-  apiKey: "AIzaSyDS_D4s0AMfA4JzAaWVTN9EvFDwDUNw3Oc",
-  authDomain: "muqu-2e634.firebaseapp.com",
-  projectId: "muqu-2e634",
-  storageBucket: "muqu-2e634.appspot.com",
-  messagingSenderId: "47150978499",
-  appId: "1:47150978499:web:5ce8af764c2404066e1976",
-  measurementId: "G-B75Q9HED44"
-})
-const firestore = firebase.firestore();
+class App extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      typed: "",
+      username: "",
+      links: [],
+    }
+  }
 
-function App() {
-  const [username, setUsername] = useState('');
-  const [name, setName] = useState('');
-  function SignIn() {
-    const setNameName = async(e) => {
+  async fetchData() {
+    const response = await fetch('https://1mvqarvetd.execute-api.us-east-2.amazonaws.com/dev');
+    const body = await response.json();
+    let array = [];
+    for (let i = 0; i < body.length; i++) {
+      let data = {link: body[i].link, id: body[i].id};
+      array.push(data);
+    }
+    await array.sort((a,b) => a.id - b.id);
+    console.log(array);
+    this.setState({links: array});
+  }
+  putData = async(tableName, link, id) => {
+    var params = {
+      TableName: tableName,
+      Item: {
+        'link': link,
+        'id': id,
+      }
+    }
+    docClient.put(params, function(err, data) {
+      console.log(!err ? "success" : err);
+    });
+  }
+  deleteData = async(tableName, link, id) => {
+    var params = {
+      TableName: tableName,
+      Key: {
+        'link': link,
+        'id': id
+      }
+    }
+    docClient.delete(params, function(err, data) {
+      console.log(!err ? "success" : err);
+    })
+  }
+
+  signIn() {
+    const setUsername = async(e) => {
       e.preventDefault();
-      setUsername(name);
-      setName('');
+      this.setState({username:this.state.typed});
+      this.setState({typed:""});
+      await this.fetchData();
     }
     return (
       <>
         <div>
           <h1>Enter Username</h1>
-          <form onSubmit={setNameName}>
-            <input value={name} onChange={(e) => setName(e.target.value)} />
+          <form onSubmit={setUsername}>
+            <input value={this.state.typed} onChange={(e) => this.setState({typed:e.target.value})} />
             <button type="submit">ENTER</button>
           </form>
         </div>
       </>
     )
   }
-  return (
-    <>
-      <div>
-        <section>
-          {username==="" ? <SignIn /> : <PlayRoom />}
-        </section>
-      </div>
-    </>
-  );
-}
 
-function PlayRoom() {
-  const messagesRef = firestore.collection('messages');
-  const query = messagesRef.orderBy("createdAt", "asc");
-  const [messages] = useCollectionData(query, {idField: 'id'});
-  const [link, setLink] = useState('');
-
-  const checkEnded = async(e) => {
-    if (e.target.getPlayerState() === 0) {
-      await messagesRef.doc("1").delete();
+  playLink() {
+    const checkEnded = async(e) => {
+      if (e.target.getPlayerState() === 0) {
+        await this.deleteData('songlinks', this.state.links[0].link, this.state.links[0].id);
+        await this.fetchData();
+        //await this.state.links.shift();
+        this.setState({typed:""});
+      }
     }
-  }
-  const onPlayerReady = async(e) => {
-    await e.target.playVideo();
-  }
-  var url = (messages !== null && messages !== undefined) ? (String)(messages[0]?.text) : "";
-  url = url.substring(url.indexOf("=")+1);
+    var url = this.state.links.length!==0 ? (String)(this.state.links[0].link) : "";
+    var videoId = url.substring(url.indexOf("=")+1);
 
-  const sendMessage = async(e) => {
-    e.preventDefault();
-    if (url !== -1) {
-      const id = (messages.length+1)+"";
-      await messagesRef.doc(id).set({
-        text: link,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+    const opts = {
+      playerVars: {
+        autoplay: 1,
+      }
     }
-    setLink('');
+    return (
+      <div>
+        <p>{url}</p>
+        <Youtube videoId={videoId} opts={opts} onStateChange={(e) => checkEnded(e)}/>
+      </div>
+    )
   }
-
-  const opts = {
-    playerVars: {
-      autoplay: 1,
-      //controls: 0
+  printSong(params) {
+    if (params.url.link === params.list[0].link) return;
+    return (
+      <div>
+        <p>{params.url.link}</p>
+      </div>
+    )
+  }
+  playRoom() {
+    const setLink = async(e) => {
+      e.preventDefault();
+      if ((String)(this.state.typed).indexOf("=") !== -1) {
+        const d = new Date();
+        await this.putData('songlinks', this.state.typed, d.getTime());
+        // let link = this.state.typed;
+        // let id = d.getTime();
+        // this.state.links.push({link,id});
+        this.setState({typed:""});
+      }
     }
+    return (
+      <>
+        <div>
+          <h1>Enter Youtube Link</h1>
+        </div>
+        <div>
+          <form onSubmit={setLink}>
+            <input value={this.state.typed} onChange={(e) => this.setState({typed:e.target.value})} />
+            <button type="submit">Play</button>
+          </form>
+        </div>
+        <div>
+          {this.playLink()}
+          {this.state.links.map(link => <this.printSong key={link.id} list={this.state.links} url={link}/>)}
+        </div>
+      </>
+    )
   }
-
-  return (
-    <>
-      <div>
-        <h1>Enter Youtube Link</h1>
-      </div>
-      <div>
-        <form onSubmit={sendMessage}>
-          <input value={link} onChange={(e) => setLink(e.target.value)} />
-          <button type="submit">Play</button>
-        </form>
-      </div>
-      <div>
-      {url !== "" ? <Youtube videoId={url} opts={opts} onReady={(e) => onPlayerReady(e)} onStateChange={(e) => checkEnded(e)}/> : <p></p>}
-        {messages?.map(msg => <PrintSong key={msg.id} message={msg}/>)}
-      </div>
-    </>
-  )
-}
-function PrintSong(props) {
-  return (
-    <div>
-      <p>{props.message.text}</p>
-    </div>
-  )
+  
+  render() {
+    return (
+      <section>
+        {this.state.username==="" ? this.signIn() : this.playRoom()}
+      </section>
+    );
+  }
 }
 
 export default App;

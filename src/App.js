@@ -3,7 +3,7 @@ import Youtube from 'react-youtube';
 import './App.css';
 
 const AWS = require('aws-sdk');
-const docClient = new AWS.DynamoDB.DocumentClient({region: 'us-east-2', accessKeyId: 'AKIAU4GEEV7DHTFK5RDF', secretAccessKey: '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'});
+const docClient = new AWS.DynamoDB.DocumentClient({region: 'us-east-2', accessKeyId: '', secretAccessKey: ''});
 
 class App extends React.Component {
   constructor() {

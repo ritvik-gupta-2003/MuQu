@@ -49,6 +49,26 @@ function App() {
   );
 }
 
+async function deleteQueryBatch(db, query, resolve) {
+  const snapshot = await query.get();
+  const batchSize = snapshot.size;
+  if (batchSize === 0) {
+    resolve();
+    return;
+  }
+  const batch = db.batch();
+  snapshot.docs.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
+  await batch.commit();
+  deleteQueryBatch(db, query, resolve);
+}
+async function deleteCollection(db, query) {
+  return new Promise((resolve) => {
+    deleteQueryBatch(db, query, resolve);
+  });
+}
+
 function PlayRoom() {
   const messagesRef = firestore.collection('messages');
   const query = messagesRef.orderBy("createdAt", "asc");
@@ -57,7 +77,19 @@ function PlayRoom() {
 
   const checkEnded = async(e) => {
     if (e.target.getPlayerState() === 0) {
-      await messagesRef.doc("1").delete();
+      //await messagesRef.doc("1").delete();
+      const temp = [];
+      const snapshot = await messagesRef.get();
+      snapshot.forEach(doc => {
+        temp.push(doc.data().text);
+      });
+      await deleteCollection(firestore, query);
+      for (let i = 1; i < temp.length; i++) {
+        await messagesRef.doc((i)+"").set({
+          text: temp[i],
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
     }
   }
   const onPlayerReady = async(e) => {
@@ -81,7 +113,6 @@ function PlayRoom() {
   const opts = {
     playerVars: {
       autoplay: 1,
-      //controls: 0
     }
   }
 

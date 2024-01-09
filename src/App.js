@@ -20,29 +20,28 @@ const firestore = firebase.firestore();
 function App() {
   const [username, setUsername] = useState('');
   const [name, setName] = useState('');
-  function SignIn() {
-    const setNameName = async(e) => {
-      e.preventDefault();
-      setUsername(name);
-      setName('');
-    }
-    return (
-      <>
-        <div>
-          <h1>Enter Username</h1>
-          <form onSubmit={setNameName}>
-            <input value={name} onChange={(e) => setName(e.target.value)} />
-            <button type="submit">ENTER</button>
-          </form>
-        </div>
-      </>
-    )
+
+  const setNameName = async(e) => {
+    e.preventDefault();
+    setUsername(name);
+    setName('');
   }
+
+  const renderComponent = (
+    <div>
+      <h1>Enter Username</h1>
+      <form onSubmit={setNameName}>
+        <input value={name} onChange={(e) => setName(e.target.value)} />
+        <button type="submit">ENTER</button>
+      </form>
+    </div>
+  )
+
   return (
     <>
       <div>
         <section>
-          {username==="" ? <SignIn /> : <PlayRoom />}
+          {username==="" ? renderComponent : <PlayRoom />}
         </section>
       </div>
     </>
